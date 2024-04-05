@@ -36,6 +36,26 @@ echo '{
 # Enable replication on the bucket
 aws s3api put-bucket-replication --bucket "$S3_BUCKET_NAME" --replication-configuration file://replication.json
 
+# Create Origin Access Identity
+OAI_ID=$(aws cloudfront create-cloud-front-origin-access-identity \
+  --cloud-front-origin-access-identity-config CallerReference=string,Comment=string \
+  --query 'CloudFrontOriginAccessIdentity.Id' \
+  --output text)
+
+# Update S3 bucket policy to restrict access to OAI
+POLICY=$(echo -n '{
+  "Version":"2012-10-17",
+  "Statement":[{
+    "Sid":"1",
+    "Effect":"Allow",
+    "Principal":{"AWS":"arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '"$OAI_ID"'"},
+    "Action":"s3:GetObject",
+    "Resource":"arn:aws:s3:::'$S3_BUCKET_NAME'/*"
+  }]
+}' | base64)
+aws s3api put-bucket-policy --bucket $S3_BUCKET_NAME --policy $POLICY
+
+
 # Create CloudFront distribution
 CLOUDFRONT_DISTRIBUTION_ID=$(aws cloudfront create-distribution \
   --origin-domain-name "${S3_BUCKET_NAME}.s3.amazonaws.com" \
