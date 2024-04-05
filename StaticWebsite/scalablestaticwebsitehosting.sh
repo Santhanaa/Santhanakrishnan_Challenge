@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Variables
 S3_BUCKET_NAME="santhana-static-website-bucket"
+TARGET_BUCKET="santhana-static-website-bucket-replica"
 DOMAIN_NAME="santhanakrishnan.com"
 ACCOUNT_ID="<accountid>"
 HOSTED_ZONE_ID="<HostedZoneIDHash>"
@@ -9,8 +9,32 @@ HOSTED_ZONE_ID="<HostedZoneIDHash>"
 # Create S3 bucket
 aws s3api create-bucket --bucket "$S3_BUCKET_NAME" --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1
 
-# Upload HTML file
-aws s3 cp index.html "s3://$S3_BUCKET_NAME/"
+# Enable versioning on the bucket
+aws s3api put-bucket-versioning --bucket "$S3_BUCKET_NAME" --versioning-configuration Status=Enabled
+
+# Create second S3 bucket for replication
+aws s3api create-bucket --bucket "$TARGET_BUCKET" --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+
+# Enable versioning on the replication bucket
+aws s3api put-bucket-versioning --bucket "$TARGET_BUCKET" --versioning-configuration Status=Enabled
+
+# Create replication configuration file
+echo '{
+  "Role":"arn:aws:iam::'$ACCOUNT_ID':role/CrossRegionReplicationRole",
+  "Rules":[{
+    "Status":"Enabled",
+    "Priority":1,
+    "DeleteMarkerReplication":{"Status":"Enabled"},
+    "Filter":{"Prefix":""},
+    "Destination":{
+      "Bucket":"arn:aws:s3:::'$TARGET_BUCKET'",
+      "StorageClass":"STANDARD"
+    }
+  }]
+}' > replication.json
+
+# Enable replication on the bucket
+aws s3api put-bucket-replication --bucket "$S3_BUCKET_NAME" --replication-configuration file://replication.json
 
 # Create CloudFront distribution
 CLOUDFRONT_DISTRIBUTION_ID=$(aws cloudfront create-distribution \
