@@ -17,7 +17,7 @@ aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --pro
 aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --protocol tcp --port 443 --cidr 0.0.0.0/0 --region $REGION
 
 # Create Key Pair
-aws ec2 create-key-pair --key-name $KEY_NAME --query 'KeyMaterial' --output text &gt; $KEY_NAME.pem
+aws ec2 create-key-pair --key-name $KEY_NAME --query 'KeyMaterial' --output text > $KEY_NAME.pem
 
 # Create Launch Configuration
 aws autoscaling create-launch-configuration --launch-configuration-name my-lc --image-id $IMAGE_ID --security-groups $SECURITY_GROUP_NAME --key-name $KEY_NAME --instance-type t2.micro --user-data <file://userdata.sh> --region $REGION
