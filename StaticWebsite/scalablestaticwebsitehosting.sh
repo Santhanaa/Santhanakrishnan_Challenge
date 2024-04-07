@@ -1,7 +1,7 @@
 #!/bin/bash
 
-S3_BUCKET_NAME="santhana-static-website-bucket"
-TARGET_BUCKET="santhana-static-website-bucket-replica"
+S3_BUCKET_NAME="santhana-comcast-test-static-website-bucket"
+TARGET_BUCKET="santhana-comcast-test-static-website-bucket-replica"
 DOMAIN_NAME="santhanakrishnan.com"
 ACCOUNT_ID="<accountid>"
 HOSTED_ZONE_ID="<HostedZoneIDHash>"
