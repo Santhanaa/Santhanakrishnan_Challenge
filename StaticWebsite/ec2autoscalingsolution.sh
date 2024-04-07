@@ -31,9 +31,15 @@ LOAD_BALANCER_ARN=$(aws elbv2 create-load-balancer --name my-load-balancer --sub
 # Create HTTP listener that redirects to HTTPS
 aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTP --port 80 --default-actions Type=redirect,TargetGroupArn=$LOAD_BALANCER_ARN,Order=1,RedirectConfig.Protocol=HTTPS,RedirectConfig.Port=443,RedirectConfig.StatusCode=HTTP_301 --region $REGION
 
-# Create HTTPS listener
-# This requires an existing SSL certificate in AWS Certificate Manager
-CERTIFICATE_ARN="arn:aws:acm:region:account:certificate/certificate-id" # Replace with your certificate ARN
+# Create a private key:
+openssl genrsa -out privatekey.pem 2048
+
+# Create a self-signed certificate:
+openssl req -new -x509 -key privatekey.pem -out cert.pem -days 365
+
+# Import the certificate into ACM:
+CERTIFICATE_ARN=$(aws acm import-certificate --certificate fileb://cert.pem --private-key fileb://privatekey.pem --region us-east-1 --query CertificateArn --output text)
+
 aws elbv2 create-listener --load-balancer-arn $LOAD_BALANCER_ARN --protocol HTTPS --port 443 --certificates CertificateArn=$CERTIFICATE_ARN --default-actions Type=forward,TargetGroupArn=$LOAD_BALANCER_ARN --region $REGION
 
 # Register ASG with Load Balancer
