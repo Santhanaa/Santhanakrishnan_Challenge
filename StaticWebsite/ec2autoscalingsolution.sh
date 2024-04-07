@@ -5,9 +5,9 @@ REGION="us-east-1"
 SECURITY_GROUP_NAME="secure-web-sg"
 KEY_NAME="myKeyPair"
 IMAGE_ID="ami-0abcd1234efgh5678" 
-VPC_ID="vpc-0abcd1234efgh5678" 
-SUBNET1_ID="subnet-0abcd1234efgh5678" 
-SUBNET2_ID="subnet-1abcd1234efgh5678" 
+VPC_ID="vpc-0ffaf925bb1d6ab56" 
+SUBNET1_ID="subnet-0c7aee4ed4f354a9d" 
+SUBNET2_ID="subnet-0b0260246131bf0d7" 
 
 # Create Security Group
 aws ec2 create-security-group --group-name $SECURITY_GROUP_NAME --description "Security Group for web server" --vpc-id $VPC_ID --region $REGION
