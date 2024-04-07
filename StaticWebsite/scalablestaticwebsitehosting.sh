@@ -1,13 +1,22 @@
 #!/bin/bash
 
-S3_BUCKET_NAME="santhana-comcast-test-static-website-bucket"
-TARGET_BUCKET="santhana-comcast-test-static-website-bucket-replica"
-DOMAIN_NAME="santhanakrishnan.com"
-ACCOUNT_ID="<accountid>"
-HOSTED_ZONE_ID="<HostedZoneIDHash>"
+S3_BUCKET_NAME="santhana-static-website-bucket"
+TARGET_BUCKET="santhana-static-website-bucket-replica"
+DOMAIN_NAME="santhanakrishnan.testsancomcast.com"
+ACCOUNT_ID="478361937160"
+HOSTED_ZONE_ID="Z0618131PYM8FJWPK4S5"
+
+# Create a private key:
+openssl genrsa -out privatekey.pem 2048
+
+# Create a self-signed certificate:
+openssl req -new -x509 -key privatekey.pem -out cert.pem -days 365
+
+# Import the certificate into ACM:
+aws acm import-certificate --certificate fileb://cert.pem --private-key fileb://privatekey.pem --region us-east-1
 
 # Create S3 bucket
-aws s3api create-bucket --bucket "$S3_BUCKET_NAME" --region us-east-1 
+aws s3api create-bucket --bucket "$S3_BUCKET_NAME" --region us-east-1
 
 # Enable versioning on the bucket
 aws s3api put-bucket-versioning --bucket "$S3_BUCKET_NAME" --versioning-configuration Status=Enabled
@@ -43,49 +52,72 @@ OAI_ID=$(aws cloudfront create-cloud-front-origin-access-identity \
   --output text)
 
 # Update S3 bucket policy to restrict access to OAI
-POLICY=$(echo -n '{
+ POLICY=$(echo -n '{
   "Version":"2012-10-17",
   "Statement":[{
     "Sid":"1",
     "Effect":"Allow",
     "Principal":{"AWS":"arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '"$OAI_ID"'"},
     "Action":"s3:GetObject",
-    "Resource":"arn:aws:s3:::'$S3_BUCKET_NAME'/*"
+    "Resource":"arn:aws:s3:::'"$S3_BUCKET_NAME"'/*"
   }]
-}' | base64)
+}')
 aws s3api put-bucket-policy --bucket $S3_BUCKET_NAME --policy $POLICY
 
 
-# Create CloudFront distribution
 CLOUDFRONT_DISTRIBUTION_ID=$(aws cloudfront create-distribution \
-  --origin-domain-name "${S3_BUCKET_NAME}.s3.amazonaws.com" \
-  --default-root-object "index.html" \
-  --viewer-certificate "ACMCertificateArn=arn:aws:acm:us-east-1:${ACCOUNT_ID}:certificate/<certificate-hash>" \
-  --default-cache-behavior '{
-    "TargetOriginId": "${S3_BUCKET_NAME}.s3.amazonaws.com",
-    "ViewerProtocolPolicy": "redirect-to-https",
-    "MinTTL": 0,
-    "MaxTTL": 31536000,
-    "DefaultTTL": 86400
+  --distribution-config '{
+    "CallerReference": "'$(date +%Y%m%d%H%M%S)'",
+    "Comment": "",
+    "DefaultRootObject": "index.html",
+    "Origins": {
+      "Quantity": 1,
+      "Items": [{
+        "Id": "S3Origin",
+        "DomainName": "testsancomcast.s3.amazonaws.com",
+        "S3OriginConfig": {
+          "OriginAccessIdentity": ""
+        }
+      }]
+    },
+    "DefaultCacheBehavior": {
+      "TargetOriginId": "S3Origin",
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "MinTTL": 0,
+      "MaxTTL": 31536000,
+      "DefaultTTL": 86400,
+      "ForwardedValues": {
+        "QueryString": false,
+        "Cookies": {
+          "Forward": "none"
+        }
+      }
+    },
+    "ViewerCertificate": {
+      "ACMCertificateArn": "arn:aws:acm:us-east-1:478361937160:certificate/b5cb173d-fd1e-4c90-a9ee-b4feae2b0e5c",
+      "SSLSupportMethod": "sni-only"
+    },
+    "Enabled": true
   }' \
   --query 'Distribution.Id' \
   --output text)
 
 # Update Route 53 record
-aws route53 change-resource-record-sets \
-  --hosted-zone-id "$HOSTED_ZONE_ID" \
+ aws route53 change-resource-record-sets \
+  --hosted-zone-id "Z0618131PYM8FJWPK4S5" \
   --change-batch "{
     \"Changes\": [
       {
         \"Action\": \"UPSERT\",
         \"ResourceRecordSet\": {
-          \"Name\": \"$DOMAIN_NAME\",
-          \"Type\": \"A\",
-          \"AliasTarget\": {
-            \"HostedZoneId\": \"$HOSTED_ZONE_ID\",
-            \"DNSName\": \"${CLOUDFRONT_DISTRIBUTION_ID}.cloudfront.net\",
-            \"EvaluateTargetHealth\": false
-          }
+          \"Name\": \"staticwebsite.testsancomcast.com\",
+          \"Type\": \"CNAME\",
+          \"ResourceRecords\": [
+            {
+              \"Value\": \"d2dzh1dhjb2hkl.cloudfront.net\"
+            }
+          ],
+          \"TTL\": 300
         }
       }
     ]
