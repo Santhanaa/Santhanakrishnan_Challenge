@@ -1,13 +1,15 @@
 ## Solution 2: Load Balanced
 
-1. Follow the same steps as in solution 1 to set up a web server on an EC2 instance, but create an Amazon Machine Image (AMI) from this instance.
+1.Create an Amazon EC2 instance and use a configuration management tool such as Ansible to configure it as a web server (e.g., Apache or Nginx). Create an Amazon Machine Image (AMI) from this instance.
 
-2. Create a Launch Configuration with this AMI.
+2. Use AWS Certificate Manager to create a self-signed SSL certificate and configure the web server to use HTTPS with this certificate.
 
-3. Use this Launch Configuration to set up an Auto Scaling Group. Configure it to scale based on demand.
+3. Create a Launch Configuration with this AMI.
 
-4. Set up a Load Balancer (ELB) and configure it to use your Auto Scaling Group.
+4. Use this Launch Configuration to set up an Auto Scaling Group. Configure it to scale based on demand.
 
-5. Use the same security group, SSL, and Route53 settings as in solution 1.
+5. Set up a Load Balancer (ELB) and configure it to use your Auto Scaling Group.
 
-6. Use CloudWatch and CloudTrail for monitoring and logging.
+6. Set up security groups to allow only HTTPS (port 443) traffic to your instance.
+
+7. Use CloudWatch and CloudTrail for monitoring and logging.
