@@ -7,13 +7,13 @@ ACCOUNT_ID="<accountid>"
 HOSTED_ZONE_ID="<HostedZoneIDHash>"
 
 # Create S3 bucket
-aws s3api create-bucket --bucket "$S3_BUCKET_NAME" --region us-east-1 --create-bucket-configuration LocationConstraint=us-east-1
+aws s3api create-bucket --bucket "$S3_BUCKET_NAME" --region us-east-1 
 
 # Enable versioning on the bucket
 aws s3api put-bucket-versioning --bucket "$S3_BUCKET_NAME" --versioning-configuration Status=Enabled
 
 # Create second S3 bucket for replication
-aws s3api create-bucket --bucket "$TARGET_BUCKET" --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+aws s3api create-bucket --bucket "$TARGET_BUCKET" --region us-west-2 
 
 # Enable versioning on the replication bucket
 aws s3api put-bucket-versioning --bucket "$TARGET_BUCKET" --versioning-configuration Status=Enabled
