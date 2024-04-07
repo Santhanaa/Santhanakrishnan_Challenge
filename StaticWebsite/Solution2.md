@@ -1,6 +1,6 @@
 ## Solution 2: Load Balanced
 
-1.Create an Amazon EC2 instance and use a configuration management tool such as Ansible to configure it as a web server (e.g., Apache or Nginx). Create an Amazon Machine Image (AMI) from this instance.
+1. Create an Amazon EC2 instance and use a configuration management tool such as Ansible to configure it as a web server (e.g., Apache or Nginx). Create an Amazon Machine Image (AMI) from this instance.
 
 2. Use AWS Certificate Manager to create a self-signed SSL certificate and configure the web server to use HTTPS with this certificate.
 
