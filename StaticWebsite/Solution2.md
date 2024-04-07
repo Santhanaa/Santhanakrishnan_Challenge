@@ -1,4 +1,4 @@
-## Solution 2: Load Balanced
+## Solution 2: Load Balanced ( Production Scenario where user activity is consistent and not that variable enough and only specific region to be covered.
 
 1. Create an Amazon EC2 instance and use a configuration management tool such as Ansible to configure it as a web server (e.g., Apache or Nginx). Create an Amazon Machine Image (AMI) from this instance.
 
