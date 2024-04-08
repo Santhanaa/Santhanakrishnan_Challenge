@@ -2,8 +2,8 @@
 
 # Variables
 DOMAIN_NAME="santhanatestcomcast.comcastchallenge.com"
-HOSTED_ZONE_ID="$(uuidgen)comcastchallenge.com."  # Replace with your Hosted Zone ID
-LOAD_BALANCER_DNS_NAME=$LOAD_BALANCER_ARN   # Replace with your Load Balancer DNS name
+HOSTED_ZONE_ID="$(uuidgen)comcastchallenge.com."  
+LOAD_BALANCER_DNS_NAME=$LOAD_BALANCER_ARN 
 
 # Create Hosted Zone
 aws route53 create-hosted-zone --name $DOMAIN_NAME --caller-reference $HOSTED_ZONE_ID
