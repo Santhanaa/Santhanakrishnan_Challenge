@@ -4,9 +4,9 @@
 
 2. Use AWS Certificate Manager to create a self-signed SSL certificate and configure the web server to use HTTPS with this certificate.
 
-3. Create a Launch Configuration with this AMI.
+3. Create a Launch Template with this AMI.
 
-4. Use this Launch Configuration to set up an Auto Scaling Group. Configure it to scale based on demand.
+4. Use this Launch Template to set up an Auto Scaling Group. Configure it to scale based on demand.
 
 5. Set up a Load Balancer (ELB) and configure it to use your Auto Scaling Group.
 
