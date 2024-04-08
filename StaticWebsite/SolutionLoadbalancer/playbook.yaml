@@ -1,19 +1,24 @@
-- name: Deploying Apache Web Server on AWS EC2 instance
-  hosts: your_EC2_instance
+- name: Deploying NGINX Web Server on AWS EC2 instance
+  hosts: web_servers
   become: yes
   tasks:
-    - name: Install httpd
+    - name: Install epel-release repo
       yum:
-        name: httpd
+        name: epel-release
         state: present
 
-    - name: Start httpd service
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start nginx service
       service:
-        name: httpd
+        name: nginx
         state: started
         enabled: yes
 
     - name: Copy website content
       copy:
         src: index.html
-        dest: /var/www/html
+        dest: /usr/share/nginx/html
