@@ -19,11 +19,10 @@ aws ec2 authorize-security-group-ingress --group-name $SECURITY_GROUP_NAME --pro
 # Create Key Pair
 aws ec2 create-key-pair --key-name $KEY_NAME --query 'KeyMaterial' --output text > $KEY_NAME.pem
 
-# Create Launch Configuration
-aws autoscaling create-launch-configuration --launch-configuration-name my-lc --image-id $IMAGE_ID --security-groups $SECURITY_GROUP_NAME --key-name $KEY_NAME --instance-type t2.micro --user-data <file://userdata.sh> --region $REGION
-
+# Create Launch Template
+aws ec2 create-launch-template --launch-template-name my-lt --version-description version1 --launch-template-data '{"ImageId":"'"$IMAGE_ID"'","KeyName":"'"$KEY_NAME"'","SecurityGroupIds":["'"$SECURITY_GROUP_NAME"'"],"InstanceType":"t2.micro","UserData":"'"$(base64 userdata.sh)"'","TagSpecifications":[{"ResourceType":"instance","Tags":[{"Key":"servername","Value":"webserver"}]}]}' --region $REGION
 # Create Auto Scaling Group
-aws autoscaling create-auto-scaling-group --auto-scaling-group-name my-asg --launch-configuration-name my-lc --min-size 1 --max-size 3 --desired-capacity 2 --vpc-zone-identifier $SUBNET1_ID,$SUBNET2_ID --region $REGION
+aws autoscaling create-auto-scaling-group --auto-scaling-group-name my-asg --launch-template '{"LaunchTemplateName":"my-lt","Version":"1"}' --min-size 1 --max-size 3 --desired-capacity 2 --vpc-zone-identifier $SUBNET1_ID,$SUBNET2_ID --region $REGION
 
 # Create Load Balancer
 LOAD_BALANCER_ARN=$(aws elbv2 create-load-balancer --name my-load-balancer --subnets $SUBNET1_ID $SUBNET2_ID --security-groups $SECURITY_GROUP_NAME --region $REGION --query 'LoadBalancers[0].LoadBalancerArn' --output text)

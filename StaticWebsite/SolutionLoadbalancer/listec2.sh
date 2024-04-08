@@ -2,7 +2,7 @@
 
 # Specify the user and private key
 user="ec2-user"
-private_key="<pathtopem>"
+private_key="$KEY_NAME.pem"
 
 # List all instances with tag servername:staticwebserver
 instances=$(aws ec2 describe-instances --filters "Name=tag:servername,Values=staticwebserver" --query "Reservations[].Instances[].PublicIpAddress" --output text)
@@ -16,4 +16,4 @@ for instance in $instances; do
 done
 
 # Run the Ansible playbook
-ansible-playbook -i inventory.txt YOUR_ANSIBLE_PLAYBOOK.yml
+ansible-playbook -i inventory.txt playbook.yml
