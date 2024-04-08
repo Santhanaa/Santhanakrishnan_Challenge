@@ -5,7 +5,7 @@ user="ec2-user"
 private_key="$KEY_NAME.pem"
 
 # List all instances with tag servername:staticwebserver
-instances=$(aws ec2 describe-instances --filters "Name=tag:servername,Values=staticwebserver" --query "Reservations[].Instances[].PublicIpAddress" --output text)
+instances=$(aws ec2 describe-instances --filters "Name=tag:servername,Values=webserver" --query "Reservations[].Instances[].PublicIpAddress" --output text)
 
 # Create an empty inventory file
 echo "[webservers]" > inventory.txt
