@@ -2,13 +2,10 @@ provider "aws" {
   region  = "us-west-2"
 }
 
-resource "aws_s3_bucket" "bucket" {
-  bucket = "santhanasre3"
-}
+provider "tls" {}
 
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  bucket = aws_s3_bucket.bucket.id
-  acl    = "private"
+resource "aws_s3_bucket" "bucket" {
+  bucket = "santhansre3"
 }
 
 resource "aws_s3_object" "object" {
@@ -16,6 +13,34 @@ resource "aws_s3_object" "object" {
   key    = "index.html"
   source = "index.html"
   acl    = "public-read"
+}
+
+data "aws_iam_policy_document" "s3_policy" {
+  statement {
+    sid       = "PublicReadGetObject"
+    effect    = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.oai.id}"]
+    }
+
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.bucket.arn}/*"]
+  }
+}
+
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  bucket = aws_s3_bucket.bucket.id
+  policy = data.aws_iam_policy_document.s3_policy.json
+}
+
+resource "aws_s3_bucket_public_access_block" "access_block" {
+  bucket = aws_s3_bucket.bucket.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls  = true
+  restrict_public_buckets = true
 }
 
 resource "aws_cloudfront_origin_access_identity" "oai" {
@@ -74,4 +99,25 @@ resource "aws_route53_record" "www" {
   type    = "CNAME"
   ttl     = "300"
   records = [aws_cloudfront_distribution.s3_distribution.domain_name]
+}
+
+resource "tls_private_key" "selfsignedcert" {
+  algorithm = "RSA"
+}
+
+resource "tls_self_signed_cert" "selfsignedcert" {
+  private_key_pem = tls_private_key.selfsignedcert.private_key_pem
+
+  subject {
+    common_name  = "https://staticwebserver.comcastsrechallenge.com"
+    organization = "Santhan, Inc."
+  }
+
+  validity_period_hours = 12
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
 }
