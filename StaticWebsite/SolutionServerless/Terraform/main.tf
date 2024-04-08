@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "my-bucket"
+  bucket = "santhanasre3"
 }
 
 resource "aws_s3_bucket_acl" "bucket_acl" {
@@ -12,7 +12,7 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
 }
 
 resource "aws_s3_object" "object" {
-  bucket = "my-bucket"
+  bucket = "santhanasre3"
   key    = "index.html"
   source = "index.html"
   acl    = "public-read"

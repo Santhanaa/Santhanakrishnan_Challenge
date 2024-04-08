@@ -130,7 +130,7 @@ Terraform will perform the following actions:
       + acceleration_status         = (known after apply)
       + acl                         = (known after apply)
       + arn                         = (known after apply)
-      + bucket                      = "my-bucket"
+      + bucket                      = "santhanasre3"
       + bucket_domain_name          = (known after apply)
       + bucket_prefix               = (known after apply)
       + bucket_regional_domain_name = (known after apply)
@@ -157,7 +157,7 @@ Terraform will perform the following actions:
   + resource "aws_s3_object" "object" {
       + acl                    = "public-read"
       + arn                    = (known after apply)
-      + bucket                 = "my-bucket"
+      + bucket                 = "santhanasre3"
       + bucket_key_enabled     = (known after apply)
       + checksum_crc32         = (known after apply)
       + checksum_crc32c        = (known after apply)
