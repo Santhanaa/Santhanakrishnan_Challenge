@@ -64,14 +64,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 }
 
+resource "aws_route53_zone" "primary" {
+  name = "comcastsrechallenge.com"
+}
+
 resource "aws_route53_record" "www" {
   zone_id = aws_route53_zone.primary.zone_id
-  name    = "www"
+  name    = "staticwebserver"
   type    = "CNAME"
   ttl     = "300"
   records = [aws_cloudfront_distribution.s3_distribution.domain_name]
-}
-
-resource "aws_route53_zone" "primary" {
-  name = "my-domain.com"
 }
